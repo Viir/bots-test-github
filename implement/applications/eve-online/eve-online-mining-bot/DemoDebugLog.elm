@@ -1,10 +1,11 @@
-module TestDebugLog exposing (..)
+module DemoDebugLog exposing (..)
 
 import BotEngineApp
 import Dict
 import EveOnline.MemoryReading
 import EveOnline.ParseUserInterface
 import Html
+import Html.Attributes
 import Json.Encode
 import Set
 
@@ -21,7 +22,7 @@ main =
                             , representsAsteroid = BotEngineApp.overviewWindowEntryRepresentsAnAsteroid overviewEntry
                             }
                 in
-                Html.text
+                [ Html.text
                     ("representsAsteroid: "
                         ++ (if resultRecord.representsAsteroid then
                                 "True"
@@ -30,8 +31,10 @@ main =
                                 "False"
                            )
                     )
+                ]
+                    |> Html.div []
             )
-        |> Html.div []
+        |> Html.div [ Html.Attributes.style "color" "whitesmoke" ]
 
 
 exampleOverviewEntries : List EveOnline.ParseUserInterface.OverviewWindowEntry
