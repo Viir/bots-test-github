@@ -40,7 +40,7 @@ main =
 exampleOverviewEntries : List EveOnline.ParseUserInterface.OverviewWindowEntry
 exampleOverviewEntries =
     [ { uiNode = minimalUiNodeWithDisplayRegion
-      , textsLeftToRight = []
+      , textsLeftToRight = [ "Some asteroid", "Veldspar", "12345 m" ]
       , cellsTexts = Dict.empty
       , objectDistance = Just "12345 m"
       , objectDistanceInMeters = Ok 12345
@@ -59,7 +59,7 @@ exampleOverviewEntries =
             }
       }
     , { uiNode = minimalUiNodeWithDisplayRegion
-      , textsLeftToRight = []
+      , textsLeftToRight = [ "Pilot Name", "Ship Type", "12345 m" ]
       , cellsTexts = Dict.empty
       , objectDistance = Just "12345 m"
       , objectDistanceInMeters = Ok 12345
