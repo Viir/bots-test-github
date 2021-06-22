@@ -95,8 +95,8 @@ But we don't have to make it so difficult for ourselves. These problems with obs
 The first step to enable observability is to decouple the observation time from the app running time. Our development tools allow us to go back to any point in time and see everything as it was back then.
 
 Let's see how this works in practice.
-Before we can travel back in time, we need to run a botengine app (or get a session archive from somewhere else, as we will see later). You can use any of the example apps in the bots repository, miner, autopilot, or anomaly bot. When we run a bot, the engine saves a recording to disk by default.
-After running an app, we can use the `botengine  devtools` command to open the development tools:
+Before we can travel back in time, we need to run a bot (or get a session archive from somewhere else, as we will see later). You can use any of the example bot programs in the bots repository, miner, autopilot, or anomaly bot. When we run a bot, the BotLab client saves a recording to disk by default.
+After running a bot, we can use the `botlab  devtools` command to open the development tools:
 
 ![Opening DevTools from the command-line](./../image/2020-07-18-open-botengine-devtools.png)
 

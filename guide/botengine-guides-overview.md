@@ -1,17 +1,17 @@
 
 ## Guides
 
-+ Video on how to run a bot or botengine app live: https://to.botengine.org/guide/video/how-to-run-a-botengine-app-live
++ Video on how to run a bot live: https://to.botengine.org/guide/video/how-to-run-a-bot-live
 
-+ How to install botengine and register the `botengine` command: https://to.botengine.org/failed-run-did-not-find-botengine-program
++ How to install the BotLab client and register the `botlab` command: https://to.botengine.org/failed-run-did-not-find-botengine-program
 
-+ How to run a bot or botengine app: https://to.botengine.org/guide/how-to-run-a-botengine-app
++ How to run a bot: https://to.botengine.org/guide/how-to-run-a-bot
 
-+ How to report an issue with an app or request a new feature: https://to.botengine.org/guide/how-to-report-an-issue-with-an-app-or-request-a-new-feature
++ How to report an issue with a bot or request a new feature: https://to.botengine.org/guide/how-to-report-an-issue-with-a-bot-or-request-a-new-feature
 
-+ Observing and inspecting (aka 'debugging') an app: https://to.botengine.org/guide/observing-and-inspecting-an-app
++ Observing and inspecting (aka 'debugging') a bot: https://to.botengine.org/guide/observing-and-inspecting-a-bot
 
-+ Testing an app using simulations: https://to.botengine.org/guide/testing-an-app-using-simulations
++ Testing a bot using simulations: https://to.botengine.org/guide/testing-a-bot-using-simulations
 
 + Input focus scheduling for multiple bot instances: https://to.botengine.org/guide/input-focus-scheduling-for-multiple-bot-instances
 
@@ -37,9 +37,9 @@
 
 + Syntax highlighting of code blocks - How to format code on the forum: https://forum.botengine.org/t/syntax-highlighting-of-code-blocks-how-to-format-code-on-the-forum/738
 
-## App Examples
+## Bot Examples
 
-Wondering what outcome you can expect from following the guides? Below is a list of example apps. You can test them for free:
+Wondering what outcome you can expect from following the guides? Below is a list of example bots. You can test them for free:
 
 + [EVE Online mining bot](https://to.botengine.org/guide/app/eve-online-mining-bot)
 
