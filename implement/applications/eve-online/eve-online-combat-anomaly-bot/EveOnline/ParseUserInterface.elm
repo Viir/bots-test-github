@@ -620,25 +620,25 @@ asUITreeNodeWithDisplayRegion { selfDisplayRegion, totalDisplayRegion, occludedR
     , children =
         uiNode.children
             |> Maybe.map
-                (List.foldl
-                    (\currentChild mappedSiblings ->
-                        let
-                            occludingSiblingsRegions =
-                                mappedSiblings
-                                    |> List.filterMap justCaseWithDisplayRegion
-                                    |> List.filter (.uiNode >> typeOccludesFollowingSiblingNodes)
-                                    |> List.map .totalDisplayRegion
-                        in
-                        (currentChild
-                            |> EveOnline.MemoryReading.unwrapUITreeNodeChild
-                            |> asUITreeNodeWithInheritedOffset
-                                { x = totalDisplayRegion.x, y = totalDisplayRegion.y }
-                                { occludedRegions = occludedRegions ++ occludingSiblingsRegions }
+                (List.reverse
+                    >> List.foldl
+                        (\currentChild mappedSiblings ->
+                            let
+                                occludingSiblingsRegions =
+                                    mappedSiblings
+                                        |> List.filterMap justCaseWithDisplayRegion
+                                        |> List.filter (.uiNode >> typeOccludesFollowingSiblingNodes)
+                                        |> List.map .totalDisplayRegion
+                            in
+                            (currentChild
+                                |> EveOnline.MemoryReading.unwrapUITreeNodeChild
+                                |> asUITreeNodeWithInheritedOffset
+                                    { x = totalDisplayRegion.x, y = totalDisplayRegion.y }
+                                    { occludedRegions = occludedRegions ++ occludingSiblingsRegions }
+                            )
+                                :: mappedSiblings
                         )
-                            :: mappedSiblings
-                    )
-                    []
-                    >> List.reverse
+                        []
                 )
     , selfDisplayRegion = selfDisplayRegion
     , totalDisplayRegion = totalDisplayRegion
