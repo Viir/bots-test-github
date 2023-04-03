@@ -620,25 +620,35 @@ asUITreeNodeWithDisplayRegion { selfDisplayRegion, totalDisplayRegion, occludedR
     , children =
         uiNode.children
             |> Maybe.map
-                (List.reverse
-                    >> List.foldl
-                        (\currentChild mappedSiblings ->
-                            let
-                                occludingSiblingsRegions =
-                                    mappedSiblings
-                                        |> List.filterMap justCaseWithDisplayRegion
-                                        |> List.filter (.uiNode >> typeOccludesFollowingSiblingNodes)
-                                        |> List.map .totalDisplayRegion
-                            in
-                            (currentChild
-                                |> EveOnline.MemoryReading.unwrapUITreeNodeChild
-                                |> asUITreeNodeWithInheritedOffset
-                                    { x = totalDisplayRegion.x, y = totalDisplayRegion.y }
-                                    { occludedRegions = occludedRegions ++ occludingSiblingsRegions }
-                            )
-                                :: mappedSiblings
+                (List.foldl
+                    (\currentChild ( mappedSiblings, occludedRegionsFromSiblings ) ->
+                        let
+                            currentChildResult =
+                                currentChild
+                                    |> EveOnline.MemoryReading.unwrapUITreeNodeChild
+                                    |> asUITreeNodeWithInheritedOffset
+                                        { x = totalDisplayRegion.x, y = totalDisplayRegion.y }
+                                        { occludedRegions = occludedRegionsFromSiblings ++ occludedRegions }
+
+                            newOccludedRegionsFromSiblings =
+                                currentChildResult
+                                    |> justCaseWithDisplayRegion
+                                    |> Maybe.map listDescendantsWithDisplayRegion
+                                    |> Maybe.withDefault []
+                                    |> List.filter (.uiNode >> nodeOccludesFollowingNodes)
+                                    |> List.map .totalDisplayRegion
+
+                            log =
+                                Debug.log "occludedRegions"
+                                    { count = List.length occludedRegions }
+                        in
+                        ( currentChildResult :: mappedSiblings
+                        , newOccludedRegionsFromSiblings ++ occludedRegionsFromSiblings
                         )
-                        []
+                    )
+                    ( [], [] )
+                    >> Tuple.first
+                    >> List.reverse
                 )
     , selfDisplayRegion = selfDisplayRegion
     , totalDisplayRegion = totalDisplayRegion
@@ -3325,13 +3335,13 @@ justCaseWithDisplayRegion child =
             Just childWithRegion
 
 
-typeOccludesFollowingSiblingNodes : EveOnline.MemoryReading.UITreeNode -> Bool
-typeOccludesFollowingSiblingNodes node =
-    Set.member node.pythonObjectTypeName pythonObjectTypesKnownToOccludeSiblingElements
+nodeOccludesFollowingNodes : EveOnline.MemoryReading.UITreeNode -> Bool
+nodeOccludesFollowingNodes node =
+    Set.member node.pythonObjectTypeName pythonObjectTypesKnownToOccludeFollowingElements
 
 
-pythonObjectTypesKnownToOccludeSiblingElements : Set.Set String
-pythonObjectTypesKnownToOccludeSiblingElements =
+pythonObjectTypesKnownToOccludeFollowingElements : Set.Set String
+pythonObjectTypesKnownToOccludeFollowingElements =
     Set.fromList
         [ -- session-recording-2022-12-09T12-32-56.zip: In Overview window: "SortHeaders"
           "SortHeaders"
