@@ -320,9 +320,38 @@ memoryOfAnomalyWithID anomalyID =
 
 anomalyBotDecisionRoot : BotDecisionContext -> DecisionPathNode
 anomalyBotDecisionRoot context =
-    anomalyBotDecisionRootBeforeApplyingSettings context
-        |> EveOnline.BotFrameworkSeparatingMemory.setMillisecondsToNextReadingFromGameBase
-            context.eventContext.botSettings.botStepDelayMilliseconds
+    case List.head context.readingFromGameClient.overviewWindows of
+        Nothing ->
+            describeBranch "No overview window"
+                waitForProgressInGame
+
+        Just overviewWindow ->
+            case
+                overviewWindow.entries
+                    |> List.sortBy (.uiNode >> .totalDisplayRegion >> .y)
+                    |> List.drop (List.length overviewWindow.entries // 2)
+                    |> List.head
+            of
+                Nothing ->
+                    describeBranch "No overview entry"
+                        waitForProgressInGame
+
+                Just overviewEntry ->
+                    case mouseClickOnUIElement MouseButtonLeft overviewEntry.uiNode of
+                        Err _ ->
+                            describeBranch "Failed to click"
+                                waitForProgressInGame
+
+                        Ok effectToClick ->
+                            describeBranch "Press the 'W' key and click on the overview entry."
+                                (decideActionForCurrentStep
+                                    ([ [ EffectOnWindow.KeyDown EffectOnWindow.vkey_W ]
+                                     , effectToClick
+                                     , [ EffectOnWindow.KeyUp EffectOnWindow.vkey_W ]
+                                     ]
+                                        |> List.concat
+                                    )
+                                )
 
 
 anomalyBotDecisionRootBeforeApplyingSettings : BotDecisionContext -> DecisionPathNode
