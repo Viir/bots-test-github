@@ -731,6 +731,11 @@ decideActionForCurrentStep effects =
         )
 
 
+bubbleSortCountingIterations : (a -> comparable) -> List a -> ( List a, Int )
+bubbleSortCountingIterations =
+    1
+
+
 bubbleSortSingleIteration : (a -> comparable) -> List a -> List a
 bubbleSortSingleIteration toComparable list =
     let
