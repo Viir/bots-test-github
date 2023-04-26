@@ -5,6 +5,26 @@ import Expect
 import Test
 
 
+bubbleSortCountingIterations_test : Test.Test
+bubbleSortCountingIterations_test =
+    [ { input = [ 0, 1, 3 ]
+      , expected = ( [ 0, 1, 3 ], 0 )
+      }
+    ]
+        |> List.indexedMap
+            (\i testCase ->
+                Test.test ("Scenario " ++ String.fromInt i) <|
+                    \_ ->
+                        let
+                            output =
+                                EveOnline.BotFrameworkSeparatingMemory.bubbleSortCountingIterations
+                        in
+                        output
+                            |> Expect.equal testCase.expected
+            )
+        |> Test.describe "bubble sort counting iterations"
+
+
 test_closestPointOnRectangleEdge : Test.Test
 test_closestPointOnRectangleEdge =
     [ { input =
