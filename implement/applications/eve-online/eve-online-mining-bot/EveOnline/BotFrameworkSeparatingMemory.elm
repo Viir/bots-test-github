@@ -732,8 +732,20 @@ decideActionForCurrentStep effects =
 
 
 bubbleSortCountingIterations : (a -> comparable) -> List a -> ( List a, Int )
-bubbleSortCountingIterations =
-    1
+bubbleSortCountingIterations toComparable list =
+    let
+        sortedWithCount currentList iterations =
+            let
+                newList =
+                    bubbleSortSingleIteration toComparable currentList
+            in
+            if newList == currentList then
+                ( newList, iterations )
+
+            else
+                sortedWithCount newList (iterations + 1)
+    in
+    sortedWithCount list 0
 
 
 bubbleSortSingleIteration : (a -> comparable) -> List a -> List a
