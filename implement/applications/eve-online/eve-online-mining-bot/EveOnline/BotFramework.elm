@@ -384,7 +384,14 @@ integrateCurrentReadingsIntoOverviewWindowMemory overviewWindow memoryBefore =
 
 deriveOverviewWindowMemorySnapshot : EveOnline.ParseUserInterface.OverviewWindow -> OverviewWindowMemorySnapshot
 deriveOverviewWindowMemorySnapshot overviewWindow =
-    { entriesDistancesInMeters = overviewWindow.entries |> List.map .objectDistanceInMeters
+    let
+        entriesSortedFromTop =
+            overviewWindow.entries
+                |> List.sortBy (.uiNode >> .totalDisplayRegion >> .y)
+    in
+    { entriesDistancesInMeters =
+        entriesSortedFromTop
+            |> List.map .objectDistanceInMeters
     }
 
 
