@@ -11,6 +11,12 @@ bubbleSortCountingIterations_test =
     [ { input = [ 0, 1, 3 ]
       , expected = ( [ 0, 1, 3 ], 0 )
       }
+    , { input = [ 0, 3, 1 ]
+      , expected = ( [ 0, 1, 3 ], 1 )
+      }
+    , { input = [ 30, -10, -100 ]
+      , expected = ( [ -100, -10, 30 ], 2 )
+      }
     ]
         |> List.indexedMap
             (\i testCase ->
