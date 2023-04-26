@@ -19,6 +19,8 @@ bubbleSortCountingIterations_test =
                         let
                             output =
                                 EveOnline.BotFrameworkSeparatingMemory.bubbleSortCountingIterations
+                                    identity
+                                    testCase.input
                         in
                         output
                             |> Expect.equal testCase.expected
