@@ -25,7 +25,12 @@ import CompilationInterface.SourceFiles
 import Dict
 import EveOnline.MemoryReading
 import EveOnline.ParseGuiFromScreenshot
-import EveOnline.ParseUserInterface exposing (DisplayRegion, OverviewWindow, centerFromDisplayRegion, getAllContainedDisplayTextsWithRegion)
+import EveOnline.ParseUserInterface
+    exposing
+        ( DisplayRegion
+        , centerFromDisplayRegion
+        , getAllContainedDisplayTextsWithRegion
+        )
 import EveOnline.VolatileProcessInterface as VolatileProcessInterface
 import Json.Decode
 import List.Extra
@@ -372,7 +377,7 @@ integrateCurrentReadingsIntoOverviewWindowsMemory currentReading memoryBefore =
             )
 
 
-deriveOverviewWindowMemorySnapshot : OverviewWindow -> OverviewWindowMemorySnapshot
+deriveOverviewWindowMemorySnapshot : EveOnline.ParseUserInterface.OverviewWindow -> OverviewWindowMemorySnapshot
 deriveOverviewWindowMemorySnapshot overviewWindow =
     { entriesDistancesInMeters = overviewWindow.entries |> List.map .objectDistanceInMeters
     }
