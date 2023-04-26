@@ -731,18 +731,22 @@ decideActionForCurrentStep effects =
         )
 
 
-bubbleSortSingleIteration : List comparable -> List comparable
-bubbleSortSingleIteration list =
-    case list of
-        [] ->
-            []
+bubbleSortSingleIteration : (a -> comparable) -> List a -> List a
+bubbleSortSingleIteration toComparable list =
+    let
+        iter xs =
+            case xs of
+                [] ->
+                    []
 
-        [ x ] ->
-            [ x ]
+                [ x ] ->
+                    [ x ]
 
-        x :: y :: xs ->
-            if x > y then
-                y :: bubbleSortSingleIteration (x :: xs)
+                x :: y :: rest ->
+                    if toComparable x > toComparable y then
+                        y :: iter (x :: rest)
 
-            else
-                x :: bubbleSortSingleIteration (y :: xs)
+                    else
+                        x :: iter (y :: rest)
+    in
+    iter list
