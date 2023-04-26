@@ -1435,10 +1435,17 @@ statusTextFromDecisionContext context =
 
         describeCurrentReading =
             [ describeMiningHold, describeShip, describeDrones ] |> String.join " "
+
+        describeOverviewSort =
+            context.readingFromGameClient
+                |> EveOnline.BotFrameworkSeparatingMemory.ensureOverviewsSortedByDistance context.memory.overviewWindows
+                |> List.map (Tuple.second >> Tuple.first)
+                |> String.join "\n"
     in
     [ "Session performance: " ++ describeSessionPerformance
     , "---"
     , "Current reading: " ++ describeCurrentReading
+    , "Overviews:\n" ++ describeOverviewSort
     ]
         |> String.join "\n"
 
