@@ -1,6 +1,7 @@
 module BotFrameworkTest exposing (..)
 
 import EveOnline.BotFramework
+import EveOnline.BotFrameworkSeparatingMemory
 import Expect
 import Test
 
