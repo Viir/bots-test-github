@@ -56,6 +56,7 @@ import Dict
 import EveOnline.BotFramework
     exposing
         ( ModuleButtonTooltipMemory
+        , OverviewWindowsMemory
         , ReadingFromGameClient
         , SeeUndockingComplete
         , ShipModulesMemory
@@ -264,6 +265,7 @@ type alias BotMemory =
     , volumeUnloadedCubicMeters : Int
     , lastUsedCapacityInMiningHold : Maybe Int
     , shipModules : ShipModulesMemory
+    , overviewWindows : OverviewWindowsMemory
     , lastReadingsInSpaceDronesWindowWasVisible : List Bool
     }
 
@@ -1356,6 +1358,7 @@ initBotMemory =
     , volumeUnloadedCubicMeters = 0
     , lastUsedCapacityInMiningHold = Nothing
     , shipModules = EveOnline.BotFramework.initShipModulesMemory
+    , overviewWindows = EveOnline.BotFramework.initOverviewWindowsMemory
     , lastReadingsInSpaceDronesWindowWasVisible = []
     }
 
@@ -1503,6 +1506,9 @@ updateMemoryForNewReadingFromGame context botMemoryBefore =
     , shipModules =
         botMemoryBefore.shipModules
             |> EveOnline.BotFramework.integrateCurrentReadingsIntoShipModulesMemory context.readingFromGameClient
+    , overviewWindows =
+        botMemoryBefore.overviewWindows
+            |> EveOnline.BotFramework.integrateCurrentReadingsIntoOverviewWindowsMemory context.readingFromGameClient
     , lastReadingsInSpaceDronesWindowWasVisible = lastReadingsInSpaceDronesWindowWasVisible
     }
 
