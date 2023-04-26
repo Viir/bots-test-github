@@ -729,3 +729,20 @@ decideActionForCurrentStep effects =
             , millisecondsToNextReadingFromGameModifierPercent = 0
             }
         )
+
+
+bubbleSortSingleIteration : List comparable -> List comparable
+bubbleSortSingleIteration list =
+    case list of
+        [] ->
+            []
+
+        [ x ] ->
+            [ x ]
+
+        x :: y :: xs ->
+            if x > y then
+                y :: bubbleSortSingleIteration (x :: xs)
+
+            else
+                x :: bubbleSortSingleIteration (y :: xs)
