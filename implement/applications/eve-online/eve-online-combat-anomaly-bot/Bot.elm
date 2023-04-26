@@ -1,4 +1,4 @@
-{- EVE Online combat anomaly bot version 2023-04-24
+{- EVE Online combat anomaly bot version 2023-04-26
 
    This bot uses the probe scanner to find combat anomalies and kills rats using drones and weapon modules.
 
@@ -15,7 +15,6 @@
 
    + Set the UI language to English.
    + Undock, open probe scanner, overview window and drones window.
-   + Set the Overview window to sort objects in space by distance with the nearest entry at the top.
    + In the ship UI, arrange the modules:
      + Place the modules to use in combat (to activate on targets) in the top row.
      + Hide passive modules by disabling the check-box `Display Passive Modules`.
@@ -89,6 +88,7 @@ import EveOnline.BotFrameworkSeparatingMemory
         , clickModuleButtonButWaitIfClickedInPreviousStep
         , decideActionForCurrentStep
         , ensureInfoPanelLocationInfoIsExpanded
+        , ensureOverviewsSortedByDistance
         , useContextMenuCascade
         , useContextMenuCascadeOnListSurroundingsButton
         , useContextMenuCascadeOnOverviewEntry
@@ -387,7 +387,10 @@ anomalyBotDecisionRootBeforeApplyingSettings context =
 
 generalSetupInUserInterface : ReadingFromGameClient -> Maybe DecisionPathNode
 generalSetupInUserInterface readingFromGameClient =
-    [ closeMessageBox, ensureInfoPanelLocationInfoIsExpanded ]
+    [ closeMessageBox
+    , ensureInfoPanelLocationInfoIsExpanded
+    , ensureOverviewsSortedByDistance >> List.filterMap Tuple.second >> List.head
+    ]
         |> List.filterMap
             (\maybeSetupDecisionFromGameReading ->
                 maybeSetupDecisionFromGameReading readingFromGameClient
