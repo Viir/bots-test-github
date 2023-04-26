@@ -81,6 +81,7 @@ import EveOnline.BotFrameworkSeparatingMemory
         , clickModuleButtonButWaitIfClickedInPreviousStep
         , decideActionForCurrentStep
         , ensureInfoPanelLocationInfoIsExpanded
+        , ensureOverviewsSortedByDistance
         , useContextMenuCascade
         , useContextMenuCascadeOnListSurroundingsButton
         , useContextMenuCascadeOnOverviewEntry
@@ -446,7 +447,10 @@ returnDronesAndRunAwayIfHitpointsAreTooLowOrWithoutDrones context shipUI =
 
 generalSetupInUserInterface : ReadingFromGameClient -> Maybe DecisionPathNode
 generalSetupInUserInterface readingFromGameClient =
-    [ closeMessageBox, ensureInfoPanelLocationInfoIsExpanded ]
+    [ closeMessageBox
+    , ensureInfoPanelLocationInfoIsExpanded
+    , ensureOverviewsSortedByDistance >> List.filterMap Tuple.second >> List.head
+    ]
         |> List.filterMap
             (\maybeSetupDecisionFromGameReading ->
                 maybeSetupDecisionFromGameReading readingFromGameClient
