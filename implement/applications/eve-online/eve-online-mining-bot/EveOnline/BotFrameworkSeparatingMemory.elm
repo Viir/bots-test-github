@@ -38,7 +38,8 @@ import EveOnline.BotFramework
         )
 import EveOnline.ParseUserInterface
     exposing
-        ( centerFromDisplayRegion
+        ( OverviewWindow
+        , centerFromDisplayRegion
         , subtractRegionsFromRegion
         )
 import List.Extra
@@ -564,6 +565,40 @@ ensureInfoPanelLocationInfoIsExpanded readingFromGameClient =
                             )
                         )
                     )
+
+
+ensureOverviewsSortedByDistance : ReadingFromGameClient -> List ( OverviewWindow, Maybe DecisionPathNode )
+ensureOverviewsSortedByDistance readingFromGameClient =
+    readingFromGameClient.overviewWindows
+        |> List.map
+            (\overviewWindow ->
+                overviewWindow
+                    |> ensureOverviewSortedByDistance
+                    |> Tuple.pair overviewWindow
+            )
+
+
+ensureOverviewSortedByDistance : OverviewWindow -> Maybe DecisionPathNode
+ensureOverviewSortedByDistance overviewWindow =
+    let
+        entriesWithDistance =
+            overviewWindow.entries
+                |> List.filterMap
+                    (\entry ->
+                        entry.objectDistanceInMeters
+                            |> Result.toMaybe
+                            |> Maybe.map (Tuple.pair entry)
+                    )
+
+        entriesWithDistanceSorted =
+            entriesWithDistance
+                |> List.sortBy Tuple.second
+    in
+    if entriesWithDistance == entriesWithDistanceSorted then
+        Nothing
+
+    else
+        Nothing
 
 
 branchDependingOnDockedOrInSpace :
