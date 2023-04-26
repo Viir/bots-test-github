@@ -567,38 +567,68 @@ ensureInfoPanelLocationInfoIsExpanded readingFromGameClient =
                     )
 
 
-ensureOverviewsSortedByDistance : ReadingFromGameClient -> List ( OverviewWindow, Maybe DecisionPathNode )
-ensureOverviewsSortedByDistance readingFromGameClient =
+ensureOverviewsSortedByDistance :
+    EveOnline.BotFramework.OverviewWindowsMemory
+    -> ReadingFromGameClient
+    -> List ( OverviewWindow, Maybe DecisionPathNode )
+ensureOverviewsSortedByDistance overviewWindowsMemory readingFromGameClient =
     readingFromGameClient.overviewWindows
         |> List.map
             (\overviewWindow ->
                 overviewWindow
-                    |> ensureOverviewSortedByDistance
+                    |> ensureOverviewSortedByDistance overviewWindowsMemory
                     |> Tuple.pair overviewWindow
             )
 
 
-ensureOverviewSortedByDistance : OverviewWindow -> Maybe DecisionPathNode
-ensureOverviewSortedByDistance overviewWindow =
+ensureOverviewSortedByDistance :
+    EveOnline.BotFramework.OverviewWindowsMemory
+    -> OverviewWindow
+    -> Maybe DecisionPathNode
+ensureOverviewSortedByDistance overviewWindowsMemory overviewWindow =
     let
-        entriesWithDistance =
-            overviewWindow.entries
-                |> List.filterMap
-                    (\entry ->
-                        entry.objectDistanceInMeters
-                            |> Result.toMaybe
-                            |> Maybe.map (Tuple.pair entry)
-                    )
+        ( _, overviewWindowMemory ) =
+            EveOnline.BotFramework.integrateCurrentReadingsIntoOverviewWindowMemory overviewWindow overviewWindowsMemory
 
-        entriesWithDistanceSorted =
-            entriesWithDistance
-                |> List.sortBy Tuple.second
+        bubbleSortDistanceFromSnapshot =
+            .entriesDistancesInMeters
+                >> List.filterMap Result.toMaybe
+                >> bubbleSortCountingIterations identity
+                >> Tuple.second
+
+        bubbleSortDistanceMinimum =
+            overviewWindowMemory.previousSnapshots
+                |> List.map bubbleSortDistanceFromSnapshot
+                |> List.minimum
+                |> Maybe.withDefault 0
     in
-    if entriesWithDistance == entriesWithDistanceSorted then
-        Nothing
+    case
+        overviewWindow.entriesHeaders
+            |> List.filter (Tuple.first >> String.toLower >> (==) "distance")
+            |> List.head
+    of
+        Nothing ->
+            Nothing
 
-    else
-        Nothing
+        Just distanceHeader ->
+            if 0 < bubbleSortDistanceMinimum then
+                Nothing
+
+            else
+                Just
+                    (Common.DecisionPath.describeBranch
+                        ("The bubble-sort distance of overview entries was at least "
+                            ++ String.fromInt bubbleSortDistanceMinimum
+                            ++ " in each of the last "
+                            ++ String.fromInt (List.length overviewWindowMemory.previousSnapshots)
+                            ++ " readings"
+                        )
+                        (mouseClickOnUIElement Common.EffectOnWindow.MouseButtonLeft (Tuple.second distanceHeader)
+                            |> Result.Extra.unpack
+                                (always (Common.DecisionPath.describeBranch "Failed to click" askForHelpToGetUnstuck))
+                                decideActionForCurrentStep
+                        )
+                    )
 
 
 branchDependingOnDockedOrInSpace :

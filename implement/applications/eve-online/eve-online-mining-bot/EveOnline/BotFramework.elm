@@ -353,28 +353,33 @@ integrateCurrentReadingsIntoOverviewWindowsMemory :
     -> OverviewWindowsMemory
 integrateCurrentReadingsIntoOverviewWindowsMemory currentReading memoryBefore =
     currentReading.overviewWindows
-        |> List.map
-            (\overviewWindow ->
-                let
-                    snapshot =
-                        deriveOverviewWindowMemorySnapshot overviewWindow
+        |> List.map (integrateCurrentReadingsIntoOverviewWindowMemory >> (|>) memoryBefore)
 
-                    currentDisplayRegion =
-                        overviewWindow.uiNode.totalDisplayRegion
 
-                    overviewWindowMemoryBefore =
-                        memoryBefore
-                            |> List.filter (Tuple.first >> (==) currentDisplayRegion)
-                            |> List.head
-                            |> Maybe.map Tuple.second
-                            |> Maybe.withDefault { previousSnapshots = [] }
-                in
-                ( currentDisplayRegion
-                , { overviewWindowMemoryBefore
-                    | previousSnapshots = snapshot :: List.take 10 overviewWindowMemoryBefore.previousSnapshots
-                  }
-                )
-            )
+integrateCurrentReadingsIntoOverviewWindowMemory :
+    EveOnline.ParseUserInterface.OverviewWindow
+    -> OverviewWindowsMemory
+    -> ( DisplayRegion, OverviewWindowMemory )
+integrateCurrentReadingsIntoOverviewWindowMemory overviewWindow memoryBefore =
+    let
+        snapshot =
+            deriveOverviewWindowMemorySnapshot overviewWindow
+
+        currentDisplayRegion =
+            overviewWindow.uiNode.totalDisplayRegion
+
+        overviewWindowMemoryBefore =
+            memoryBefore
+                |> List.filter (Tuple.first >> (==) currentDisplayRegion)
+                |> List.head
+                |> Maybe.map Tuple.second
+                |> Maybe.withDefault { previousSnapshots = [] }
+    in
+    ( currentDisplayRegion
+    , { overviewWindowMemoryBefore
+        | previousSnapshots = snapshot :: List.take 10 overviewWindowMemoryBefore.previousSnapshots
+      }
+    )
 
 
 deriveOverviewWindowMemorySnapshot : EveOnline.ParseUserInterface.OverviewWindow -> OverviewWindowMemorySnapshot
