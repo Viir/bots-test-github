@@ -1,10 +1,7 @@
 module BotFrameworkTest exposing (..)
 
-import Base64
-import DecodeBMPImage
-import EveOnline.BotFramework exposing (Location2d, PixelValueRGB)
+import EveOnline.BotFramework
 import Expect
-import Result.Extra
 import Test
 
 
