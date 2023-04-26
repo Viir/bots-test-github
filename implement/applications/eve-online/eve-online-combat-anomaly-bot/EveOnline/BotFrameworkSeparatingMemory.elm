@@ -567,7 +567,7 @@ ensureInfoPanelLocationInfoIsExpanded readingFromGameClient =
                     )
 
 
-ensureOverviewsSortedByDistance : ReadingFromGameClient -> List ( OverviewWindow, Maybe DecisionPathNode )
+ensureOverviewsSortedByDistance : ReadingFromGameClient -> List ( OverviewWindow, ( String, Maybe DecisionPathNode ) )
 ensureOverviewsSortedByDistance readingFromGameClient =
     readingFromGameClient.overviewWindows
         |> List.map
@@ -578,7 +578,7 @@ ensureOverviewsSortedByDistance readingFromGameClient =
             )
 
 
-ensureOverviewSortedByDistance : OverviewWindow -> Maybe DecisionPathNode
+ensureOverviewSortedByDistance : OverviewWindow -> ( String, Maybe DecisionPathNode )
 ensureOverviewSortedByDistance overviewWindow =
     let
         entriesWithDistance =

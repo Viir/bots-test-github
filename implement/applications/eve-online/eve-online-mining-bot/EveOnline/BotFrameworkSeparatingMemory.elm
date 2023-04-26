@@ -570,7 +570,7 @@ ensureInfoPanelLocationInfoIsExpanded readingFromGameClient =
 ensureOverviewsSortedByDistance :
     EveOnline.BotFramework.OverviewWindowsMemory
     -> ReadingFromGameClient
-    -> List ( OverviewWindow, Maybe DecisionPathNode )
+    -> List ( OverviewWindow, ( String, Maybe DecisionPathNode ) )
 ensureOverviewsSortedByDistance overviewWindowsMemory readingFromGameClient =
     readingFromGameClient.overviewWindows
         |> List.map
@@ -584,7 +584,7 @@ ensureOverviewsSortedByDistance overviewWindowsMemory readingFromGameClient =
 ensureOverviewSortedByDistance :
     EveOnline.BotFramework.OverviewWindowsMemory
     -> OverviewWindow
-    -> Maybe DecisionPathNode
+    -> ( String, Maybe DecisionPathNode )
 ensureOverviewSortedByDistance overviewWindowsMemory overviewWindow =
     let
         ( _, overviewWindowMemory ) =
@@ -608,27 +608,25 @@ ensureOverviewSortedByDistance overviewWindowsMemory overviewWindow =
             |> List.head
     of
         Nothing ->
-            Nothing
+            ( "Sort header for distance not found", Nothing )
 
         Just distanceHeader ->
-            if 0 < bubbleSortDistanceMinimum then
-                Nothing
+            if bubbleSortDistanceMinimum < 1 then
+                ( "Already sorted", Nothing )
 
             else
-                Just
-                    (Common.DecisionPath.describeBranch
-                        ("The bubble-sort distance of overview entries was at least "
-                            ++ String.fromInt bubbleSortDistanceMinimum
-                            ++ " in each of the last "
-                            ++ String.fromInt (List.length overviewWindowMemory.previousSnapshots)
-                            ++ " readings"
-                        )
-                        (mouseClickOnUIElement Common.EffectOnWindow.MouseButtonLeft (Tuple.second distanceHeader)
-                            |> Result.Extra.unpack
-                                (always (Common.DecisionPath.describeBranch "Failed to click" askForHelpToGetUnstuck))
-                                decideActionForCurrentStep
-                        )
+                ( "The bubble-sort distance of overview entries was at least "
+                    ++ String.fromInt bubbleSortDistanceMinimum
+                    ++ " in each of the last "
+                    ++ String.fromInt (List.length overviewWindowMemory.previousSnapshots)
+                    ++ " readings"
+                , Just
+                    (mouseClickOnUIElement Common.EffectOnWindow.MouseButtonLeft (Tuple.second distanceHeader)
+                        |> Result.Extra.unpack
+                            (always (Common.DecisionPath.describeBranch "Failed to click" askForHelpToGetUnstuck))
+                            decideActionForCurrentStep
                     )
+                )
 
 
 branchDependingOnDockedOrInSpace :

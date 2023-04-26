@@ -449,7 +449,12 @@ generalSetupInUserInterface : BotDecisionContext -> Maybe DecisionPathNode
 generalSetupInUserInterface context =
     [ closeMessageBox
     , ensureInfoPanelLocationInfoIsExpanded
-    , ensureOverviewsSortedByDistance context.memory.overviewWindows >> List.filterMap Tuple.second >> List.head
+    , ensureOverviewsSortedByDistance context.memory.overviewWindows
+        >> List.filterMap
+            (\( _, ( description, maybeAction ) ) ->
+                maybeAction |> Maybe.map (describeBranch description)
+            )
+        >> List.head
     ]
         |> List.filterMap ((|>) context.readingFromGameClient)
         |> List.head
