@@ -25,7 +25,7 @@ import CompilationInterface.SourceFiles
 import Dict
 import EveOnline.MemoryReading
 import EveOnline.ParseGuiFromScreenshot
-import EveOnline.ParseUserInterface exposing (DisplayRegion, centerFromDisplayRegion, getAllContainedDisplayTextsWithRegion)
+import EveOnline.ParseUserInterface exposing (DisplayRegion, OverviewWindow, centerFromDisplayRegion, getAllContainedDisplayTextsWithRegion)
 import EveOnline.VolatileProcessInterface as VolatileProcessInterface
 import Json.Decode
 import List.Extra
@@ -183,6 +183,20 @@ type alias ModuleButtonTooltipMemory =
     }
 
 
+type alias OverviewWindowsMemory =
+    List ( DisplayRegion, OverviewWindowMemory )
+
+
+type alias OverviewWindowMemory =
+    { previousSnapshots : List OverviewWindowMemorySnapshot
+    }
+
+
+type alias OverviewWindowMemorySnapshot =
+    { entriesDistancesInMeters : List (Result String Int)
+    }
+
+
 type alias ContextMenu =
     { uiNode : UITreeNodeWithDisplayRegion
     , entries : List ContextMenuEntry
@@ -254,7 +268,15 @@ initShipModulesMemory =
     }
 
 
-integrateCurrentReadingsIntoShipModulesMemory : EveOnline.ParseUserInterface.ParsedUserInterface -> ShipModulesMemory -> ShipModulesMemory
+initOverviewWindowsMemory : OverviewWindowsMemory
+initOverviewWindowsMemory =
+    []
+
+
+integrateCurrentReadingsIntoShipModulesMemory :
+    EveOnline.ParseUserInterface.ParsedUserInterface
+    -> ShipModulesMemory
+    -> ShipModulesMemory
 integrateCurrentReadingsIntoShipModulesMemory currentReading memoryBefore =
     let
         currentTooltipMemory =
@@ -317,6 +339,42 @@ integrateCurrentReadingsIntoShipModulesMemory currentReading memoryBefore =
     , previousReadingTooltip =
         currentTooltipMemory
             |> Maybe.Extra.orElse memoryBefore.previousReadingTooltip
+    }
+
+
+integrateCurrentReadingsIntoOverviewWindowsMemory :
+    EveOnline.ParseUserInterface.ParsedUserInterface
+    -> OverviewWindowsMemory
+    -> OverviewWindowsMemory
+integrateCurrentReadingsIntoOverviewWindowsMemory currentReading memoryBefore =
+    currentReading.overviewWindows
+        |> List.map
+            (\overviewWindow ->
+                let
+                    snapshot =
+                        deriveOverviewWindowMemorySnapshot overviewWindow
+
+                    currentDisplayRegion =
+                        overviewWindow.uiNode.totalDisplayRegion
+
+                    overviewWindowMemoryBefore =
+                        memoryBefore
+                            |> List.filter (Tuple.first >> (==) currentDisplayRegion)
+                            |> List.head
+                            |> Maybe.map Tuple.second
+                            |> Maybe.withDefault { previousSnapshots = [] }
+                in
+                ( currentDisplayRegion
+                , { overviewWindowMemoryBefore
+                    | previousSnapshots = snapshot :: List.take 10 overviewWindowMemoryBefore.previousSnapshots
+                  }
+                )
+            )
+
+
+deriveOverviewWindowMemorySnapshot : OverviewWindow -> OverviewWindowMemorySnapshot
+deriveOverviewWindowMemorySnapshot overviewWindow =
+    { entriesDistancesInMeters = overviewWindow.entries |> List.map .objectDistanceInMeters
     }
 
 
