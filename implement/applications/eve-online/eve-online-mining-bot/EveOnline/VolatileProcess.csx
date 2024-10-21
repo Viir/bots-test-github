@@ -87,8 +87,6 @@ class Request
 
     public ReadFromWindowStructure ReadFromWindow;
 
-    public TaskOnWindow<EffectSequenceElement[]> EffectSequenceOnWindow;
-
     public class SearchUIRootAddressStructure
     {
         public int processId;
@@ -99,46 +97,6 @@ class Request
         public string windowId;
 
         public ulong uiRootAddress;
-    }
-
-    public class TaskOnWindow<Task>
-    {
-        public string windowId;
-
-        public bool bringWindowToForeground;
-
-        public Task task;
-    }
-
-    public class EffectSequenceElement
-    {
-        public EffectOnWindowStructure effect;
-
-        public int? delayMilliseconds;
-    }
-
-    public class EffectOnWindowStructure
-    {
-        public MouseMoveToStructure MouseMoveTo;
-
-        public KeyboardKey KeyDown;
-
-        public KeyboardKey KeyUp;
-    }
-
-    public class KeyboardKey
-    {
-        public int virtualKeyCode;
-    }
-
-    public class MouseMoveToStructure
-    {
-        public Location2d location;
-    }
-
-    public enum MouseButton
-    {
-        left, right,
     }
 }
 
@@ -151,10 +109,6 @@ class Response
     public ReadFromWindowResultStructure ReadFromWindowResult;
 
     public string FailedToBringWindowToFront;
-
-    public object CompletedEffectSequenceOnWindow;
-
-    public object CompletedOtherEffect;
 
     public class GameClientProcessSummaryStruct
     {
@@ -352,38 +306,6 @@ Response request(Request request)
         };
     }
 
-    if (request?.EffectSequenceOnWindow?.task != null)
-    {
-        var windowHandle = new IntPtr(long.Parse(request.EffectSequenceOnWindow.windowId));
-
-        if (request.EffectSequenceOnWindow.bringWindowToForeground)
-        {
-            var setForegroundWindowError = SetForegroundWindowInWindows.TrySetForegroundWindow(windowHandle);
-
-            if (setForegroundWindowError != null)
-            {
-                return new Response
-                {
-                    FailedToBringWindowToFront = setForegroundWindowError,
-                };
-            }
-        }
-
-        foreach (var sequenceElement in request.EffectSequenceOnWindow.task)
-        {
-            if (sequenceElement?.effect != null)
-                ExecuteEffectOnWindow(sequenceElement.effect, windowHandle, request.EffectSequenceOnWindow.bringWindowToForeground);
-
-            if (sequenceElement?.delayMilliseconds != null)
-                System.Threading.Thread.Sleep(sequenceElement.delayMilliseconds.Value);
-        }
-
-        return new Response
-        {
-            CompletedEffectSequenceOnWindow = new object(),
-        };
-    }
-
     return null;
 }
 
@@ -423,82 +345,6 @@ static ulong? FindUIRootAddressFromProcessId(int processId)
             .FirstOrDefault()
             ?.pythonObjectAddress;
     }
-}
-
-void ExecuteEffectOnWindow(
-    Request.EffectOnWindowStructure effectOnWindow,
-    IntPtr windowHandle,
-    bool bringWindowToForeground)
-{
-    if (bringWindowToForeground)
-        BotEngine.WinApi.User32.SetForegroundWindow(windowHandle);
-
-    if (effectOnWindow?.MouseMoveTo != null)
-    {
-        //  Build motion description based on https://github.com/Arcitectus/Sanderling/blob/ada11c9f8df2367976a6bcc53efbe9917107bfa7/src/Sanderling/Sanderling/Motor/Extension.cs#L24-L131
-
-        var mousePosition = new Bib3.Geometrik.Vektor2DInt(
-            effectOnWindow.MouseMoveTo.location.x,
-            effectOnWindow.MouseMoveTo.location.y);
-
-        var mouseButtons = new BotEngine.Motor.MouseButtonIdEnum[] { };
-
-        var windowMotor = new Sanderling.Motor.WindowMotor(windowHandle);
-
-        var motionSequence = new BotEngine.Motor.Motion[]{
-            new BotEngine.Motor.Motion(
-                mousePosition: mousePosition,
-                mouseButtonDown: mouseButtons,
-                windowToForeground: bringWindowToForeground),
-            new BotEngine.Motor.Motion(
-                mousePosition: mousePosition,
-                mouseButtonUp: mouseButtons,
-                windowToForeground: bringWindowToForeground),
-        };
-
-        windowMotor.ActSequenceMotion(motionSequence);
-    }
-
-    if (effectOnWindow?.KeyDown != null)
-    {
-        var virtualKeyCode = (WindowsInput.Native.VirtualKeyCode)effectOnWindow.KeyDown.virtualKeyCode;
-
-        (MouseActionForKeyUpOrDown(keyCode: virtualKeyCode, buttonUp: false)
-        ??
-        (() => new WindowsInput.InputSimulator().Keyboard.KeyDown(virtualKeyCode)))();
-    }
-
-    if (effectOnWindow?.KeyUp != null)
-    {
-        var virtualKeyCode = (WindowsInput.Native.VirtualKeyCode)effectOnWindow.KeyUp.virtualKeyCode;
-
-        (MouseActionForKeyUpOrDown(keyCode: virtualKeyCode, buttonUp: true)
-        ??
-        (() => new WindowsInput.InputSimulator().Keyboard.KeyUp(virtualKeyCode)))();
-    }
-}
-
-static System.Action MouseActionForKeyUpOrDown(WindowsInput.Native.VirtualKeyCode keyCode, bool buttonUp)
-{
-    WindowsInput.IMouseSimulator mouseSimulator() => new WindowsInput.InputSimulator().Mouse;
-
-    var method = keyCode switch
-    {
-        WindowsInput.Native.VirtualKeyCode.LBUTTON =>
-            buttonUp ?
-            (System.Func<WindowsInput.IMouseSimulator>)mouseSimulator().LeftButtonUp
-            : mouseSimulator().LeftButtonDown,
-        WindowsInput.Native.VirtualKeyCode.RBUTTON =>
-            buttonUp ?
-            (System.Func<WindowsInput.IMouseSimulator>)mouseSimulator().RightButtonUp
-            : mouseSimulator().RightButtonDown,
-        _ => null
-    };
-
-    if (method != null)
-        return () => method();
-
-    return null;
 }
 
 string SerializeToJsonForBot<T>(T value) =>
