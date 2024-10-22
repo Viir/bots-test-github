@@ -262,22 +262,6 @@ Response request(Request request)
             }
         }
 
-        {
-            /*
-            Maybe taking screenshots needs the window to be not occluded by other windows.
-            We can review this later.
-            */
-            var setForegroundWindowError = SetForegroundWindowInWindows.TrySetForegroundWindow(windowHandle);
-
-            if (setForegroundWindowError != null)
-            {
-                return new Response
-                {
-                    FailedToBringWindowToFront = setForegroundWindowError,
-                };
-            }
-        }
-
         var historyEntry = new ReadingFromGameClient
         {
             windowHandle = windowHandle,
@@ -439,55 +423,6 @@ static public class WinApi
 
     [DllImport("user32.dll", SetLastError = true)]
     static public extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
-}
-
-static public class SetForegroundWindowInWindows
-{
-    static public int AltKeyPlusSetForegroundWindowWaitTimeMilliseconds = 60;
-
-    /// <summary>
-    /// </summary>
-    /// <param name="windowHandle"></param>
-    /// <returns>null in case of success</returns>
-    static public string TrySetForegroundWindow(IntPtr windowHandle)
-    {
-        try
-        {
-            /*
-            * For the conditions for `SetForegroundWindow` to work, see https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setforegroundwindow
-            * */
-            BotEngine.WinApi.User32.SetForegroundWindow(windowHandle);
-
-            if (BotEngine.WinApi.User32.GetForegroundWindow() == windowHandle)
-                return null;
-
-            var windowsInZOrder = WinApi.ListWindowHandlesInZOrder();
-
-            var windowIndex = windowsInZOrder.ToList().IndexOf(windowHandle);
-
-            if (windowIndex < 0)
-                return "Did not find window for this handle";
-
-            {
-                var simulator = new WindowsInput.InputSimulator();
-
-                simulator.Keyboard.KeyDown(WindowsInput.Native.VirtualKeyCode.MENU);
-                BotEngine.WinApi.User32.SetForegroundWindow(windowHandle);
-                simulator.Keyboard.KeyUp(WindowsInput.Native.VirtualKeyCode.MENU);
-
-                System.Threading.Thread.Sleep(AltKeyPlusSetForegroundWindowWaitTimeMilliseconds);
-
-                if (BotEngine.WinApi.User32.GetForegroundWindow() == windowHandle)
-                    return null;
-
-                return "Alt key plus SetForegroundWindow approach was not successful.";
-            }
-        }
-        catch (Exception e)
-        {
-            return "Exception: " + e.ToString();
-        }
-    }
 }
 
 struct Rectangle
