@@ -1510,6 +1510,7 @@ getSetupTaskWhenVolatileProcessSetupCompleted { timeInMilliseconds } botConfigur
                                                                                       ]
                                                                                     , effectSequenceOnWindow
                                                                                         |> List.map (effectOnWindowAsWindowsInputSequenceItem lastReadFromGameComplete)
+                                                                                        |> List.intersperse (InterfaceToHost.WaitMilliseconds 210)
                                                                                     ]
                                                                                 )
                                                             , readFromWindowTasks =
