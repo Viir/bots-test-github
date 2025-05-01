@@ -82,6 +82,7 @@ import EveOnline.BotFramework
         , useMenuEntryInLastContextMenuInCascade
         , useMenuEntryWithTextContaining
         , useMenuEntryWithTextContainingFirstOf
+        , useMenuEntryWithTextContainingFirstOfCommonContinuation
         , useMenuEntryWithTextEqual
         )
 import EveOnline.BotFrameworkSeparatingMemory
@@ -688,7 +689,18 @@ dockOrWarpToLocationWithMatchingName { namesFromSettingOrInfoPanel } context =
     in
     useContextMenuOnLocationWithMatchingName
         displayTextRepresentsMatchingStation
-        (useMenuEntryWithTextContaining "dock" menuCascadeCompleted)
+        (useMenuEntryWithTextContainingFirstOf
+            [ ( "dock"
+              , menuCascadeCompleted
+              )
+            , ( "Warp to Within (0 m)"
+              , menuCascadeCompleted
+              )
+            , ( "Warp to"
+              , useMenuEntryWithTextContaining "Within 0 m" menuCascadeCompleted
+              )
+            ]
+        )
         context
 
 
@@ -764,7 +776,7 @@ useContextMenuOnLocationWithMatchingName nameMatches useMenu context =
                 |> Maybe.andThen scrollDown
                 |> Maybe.withDefault
                     (useContextMenuCascadeOnListSurroundingsButton
-                        (useMenuEntryWithTextContainingFirstOf
+                        (useMenuEntryWithTextContainingFirstOfCommonContinuation
                             [ "locations" ]
                             (useMenuEntryInLastContextMenuInCascade
                                 { describeChoice = "select using the configured predicate"
@@ -895,7 +907,7 @@ dockAtRandomStationOrStructure context seeUndockingComplete =
                         }
             in
             useContextMenuCascadeOnListSurroundingsButton
-                (useMenuEntryWithTextContainingFirstOf [ "stations", "structures" ]
+                (useMenuEntryWithTextContainingFirstOfCommonContinuation [ "stations", "structures" ]
                     (chooseNextMenuEntryDockOrRandom 3)
                 )
                 context
