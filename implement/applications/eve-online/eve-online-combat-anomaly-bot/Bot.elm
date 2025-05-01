@@ -616,7 +616,7 @@ runAway context shipUI =
         hideLocationNames ->
             let
                 routesToHideLocation =
-                    dockToStationOrStructureWithMatchingName
+                    dockOrWarpToLocationWithMatchingName
                         { namesFromSettingOrInfoPanel = hideLocationNames }
                         context
             in
@@ -643,7 +643,7 @@ runAway context shipUI =
                                 (routesToHideLocation.viaSolarSystemMenu ())
 
 
-dockToStationOrStructureWithMatchingName :
+dockOrWarpToLocationWithMatchingName :
     { namesFromSettingOrInfoPanel : List String }
     -> BotDecisionContext
     ->
@@ -651,7 +651,7 @@ dockToStationOrStructureWithMatchingName :
         , viaOverview : Maybe DecisionPathNode
         , viaSolarSystemMenu : () -> DecisionPathNode
         }
-dockToStationOrStructureWithMatchingName { namesFromSettingOrInfoPanel } context =
+dockOrWarpToLocationWithMatchingName { namesFromSettingOrInfoPanel } context =
     let
         destNamesSimplified : List String
         destNamesSimplified =
