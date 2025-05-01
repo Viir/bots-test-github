@@ -652,6 +652,16 @@ dockOrWarpToLocationWithMatchingName :
         , viaSolarSystemMenu : () -> DecisionPathNode
         }
 dockOrWarpToLocationWithMatchingName { namesFromSettingOrInfoPanel } context =
+    {-
+       session-2025-04-29T00-59:
+       A location given with settings is in space and is NOT directly at a structure.
+       In the context menu for that location, we see following entries at the top:
+       ----
+       Warp to Within (0 m) -> This one appears to be expandable.
+       Align to
+       Show Info
+       ...
+    -}
     let
         destNamesSimplified : List String
         destNamesSimplified =
